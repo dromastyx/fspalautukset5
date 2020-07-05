@@ -7,13 +7,12 @@ const LoginForm = ({
   handleUsernameChange,
   handlePasswordChange,
   username,
-  password,
-  message
+  password
 }) => {
   return (
-    <div>
-      <h2>Log in to application</h2>
-      <Notification message={message} />
+    <div >
+      <h2 style={{ marginBottom: 16 }}>Log in to application</h2>
+      <Notification />
       <form onSubmit={handleLogin}>
         <div>
          username
@@ -32,7 +31,7 @@ const LoginForm = ({
             onChange={handlePasswordChange}
           />
         </div>
-        <button type="submit" id="login-button">login</button>
+        <button type="submit" id="login-button" style={{ marginTop: 10 }}>login</button>
       </form>
     </div>
   )

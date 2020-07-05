@@ -1,24 +1,59 @@
-import React, { useState } from 'react'
-const Blog = ({ blog, updateLikes, removeBlog }) => {
-  const blogStyle = {
-    paddingTop: 10,
-    paddingLeft: 2,
-    border: 'solid',
-    borderWidth: 1,
-    marginBottom: 5
-  }
-  const [showFull, setShowFull] = useState(false)
+import React, { useEffect, useState } from 'react'
+import commentService from '../services/comments'
+import {
+  useParams
+} from 'react-router-dom'
 
-  const showFullData = { display: showFull ? '' : 'none' }
+const Blog = ({ blogs, updateLikes, removeBlog }) => {
+
+  const blogStyle = {
+    padding: 20,
+    border: 'solid',
+    borderWidth: 2,
+    margin: 12
+  }
+
+  const [ comments, setComments ] = useState([])
+  const [ comment, setComment ] = useState('')
+
+  const id = useParams().id
+
+  useEffect(() => {
+    commentService.getAll(id).then(comments => {
+      setComments(comments)
+    })
+  }, [id])
+
+  const addComment = (event) => {
+    event.preventDefault()
+    commentService.create({ content: comment, blog: id }, id)
+      .then(createdComment => setComments(comments.concat(createdComment)))
+    setComment('')
+  }
+
+  const blog = blogs.find(u => u.id === id)
+  if (!blog) {
+    return null
+  }
 
   return (
     <div style={blogStyle}>
-      {blog.title} {blog.author} <button onClick={() => setShowFull(!showFull)}>{showFull ? 'hide' : 'view'}</button>
-      <div style={showFullData} className='togglable'>
-        <p>{blog.url}</p>
-        <p>likes {blog.likes} <button onClick={updateLikes} id="likeButton">like</button></p>
-        <p>{blog.user ? blog.user.name : ''}</p>
-        <button onClick={removeBlog}>remove</button>
+      <h1> {blog.title} {blog.author} </h1>
+      <div  className='togglable'>
+        Url: <a href={blog.url}>{blog.url}</a>
+        <p>Likes: {blog.likes} <button onClick={() => updateLikes(blog)} id="likeButton">like</button></p>
+        <p>Added by {blog.user ? blog.user.name : ''}</p>
+        <button onClick={() => removeBlog(blog)}>remove blog</button>
+        <h3>Comments</h3>
+        <form onSubmit={addComment}>
+          <input value={comment} onChange={({ target }) => setComment(target.value)}/>
+          <button type="submit">add comment</button>
+        </form>
+        <div>
+          {comments.length !== 0 ? <ul>{comments.map(comment =>
+            <li key={comment.id}>{comment.content}</li>
+          )}</ul> : <p>No comments</p>}
+        </div>
       </div>
     </div>
   )
